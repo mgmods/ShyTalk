@@ -2,6 +2,8 @@ name: Build ShyTalk APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["main"]
 
 jobs:
   build:
@@ -11,20 +13,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '21'
+          java-version: "17"
+          distribution: "temurin"
+          cache: gradle
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build APK
+        run: ./gradlew assembleDebug -x processDevDebugGoogleServices
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ShyTalk-APK
           path: "**/build/outputs/apk/**/*.apk"
+          if-no-files-found: error
